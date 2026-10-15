@@ -320,6 +320,18 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsVision: true,
   },
 
+  // ── Gemini 4 Argon ──────────────────────────────────────────────
+  "gemini-4-argon": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    defaultThinkingBudget: 8192,
+    thinkingBudgetCap: 24576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    aliases: ["gemini-4"],
+  },
+
   // Provider-neutral compatibility for providers that still serve Gemini 3.6.
   // Antigravity/AGY availability is governed by their own provider catalogs and
   // retirement filters; these shared specs must not be treated as an allowlist.
@@ -958,6 +970,12 @@ function getModelSpecIndex() {
  * that function instead.
  */
 export function findModelSpecIdByExactOrAlias(modelId: string): string | null {
+  const slash = modelId.indexOf("/");
+  if (slash > 0 && slash < modelId.length - 1) {
+    const unnamespaced = modelId.slice(slash + 1);
+    const hit = findModelSpecIdByExactOrAlias(unnamespaced);
+    if (hit) return hit;
+  }
   const lower = modelId.toLowerCase();
   const index = getModelSpecIndex();
   const exactHit = index.exactCi.get(lower);
@@ -969,6 +987,15 @@ export function findModelSpecIdByExactOrAlias(modelId: string): string | null {
 
 export function getCanonicalModelSpecId(modelId: string): string | null {
   if (MODEL_SPECS[modelId]) return modelId;
+
+  // Strip provider/prefix namespace if present (e.g. "vertex/gemini-4-argon" -> "gemini-4-argon",
+  // "agy/gemini-3.8-flash-high" -> "gemini-3.8-flash-high") so provider-qualified IDs match canonical specs.
+  const slash = modelId.indexOf("/");
+  if (slash > 0 && slash < modelId.length - 1) {
+    const unnamespaced = modelId.slice(slash + 1);
+    const unnamespacedHit = getCanonicalModelSpecId(unnamespaced);
+    if (unnamespacedHit) return unnamespacedHit;
+  }
 
   // Case-insensitive lookups: upstream model ids are often capitalized
   // (e.g. "MiniMax-M2.7") while specs/aliases use lowercase ids (#3141).
