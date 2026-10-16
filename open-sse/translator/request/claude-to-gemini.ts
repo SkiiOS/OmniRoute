@@ -52,6 +52,72 @@ function urlImagePart(url) {
   return { fileData: { fileUri: url, mimeType: "image/*" } };
 }
 
+function isPlainTextPart(part: { text?: unknown }): boolean {
+  return Object.keys(part).length === 1 && typeof part.text === "string";
+}
+
+function appendTextToFunctionResponse(
+  part: { functionResponse?: { response?: Record<string, unknown> } },
+  textParts: string[]
+): boolean {
+  const response = part.functionResponse?.response;
+  if (!response || typeof response.result !== "string") return false;
+  const combinedText = textParts.join("\n");
+  if (!combinedText) return false;
+  response.result = response.result ? `${response.result}\n${combinedText}` : combinedText;
+  return true;
+}
+
+function mergeTrailingTextIntoFunctionResponses(contents: GeminiContent[]) {
+  for (const content of contents) {
+    if (content.role !== "user") continue;
+
+    const responseIndexes: number[] = [];
+    for (let index = 0; index < content.parts.length; index++) {
+      if (content.parts[index].functionResponse) responseIndexes.push(index);
+    }
+
+    for (let responseNumber = responseIndexes.length - 1; responseNumber >= 0; responseNumber--) {
+      const responseIndex = responseIndexes[responseNumber];
+      const nextResponseIndex = responseIndexes[responseNumber + 1] ?? content.parts.length;
+      const textIndexes: number[] = [];
+      const textParts: string[] = [];
+      for (let index = responseIndex + 1; index < nextResponseIndex; index++) {
+        const part = content.parts[index];
+        if (isPlainTextPart(part)) {
+          textIndexes.push(index);
+          textParts.push(part.text as string);
+        }
+      }
+      if (textParts.length === 0) continue;
+      if (!appendTextToFunctionResponse(content.parts[responseIndex], textParts)) continue;
+      for (const index of textIndexes.reverse()) content.parts.splice(index, 1);
+    }
+
+    // Origin now lifts a following system turn into leading text on the same
+    // user tool-result content. Fold that text into the first functionResponse
+    // so Vertex still sees a single functionResponse part.
+    const firstResponseIndex = content.parts.findIndex((part) => part.functionResponse);
+    if (firstResponseIndex <= 0) continue;
+    const leadingIndexes: number[] = [];
+    const leadingTexts: string[] = [];
+    let leadingOnlyText = true;
+    for (let index = 0; index < firstResponseIndex; index++) {
+      const part = content.parts[index];
+      if (isPlainTextPart(part)) {
+        leadingIndexes.push(index);
+        leadingTexts.push(part.text as string);
+      } else {
+        leadingOnlyText = false;
+        break;
+      }
+    }
+    if (!leadingOnlyText || leadingTexts.length === 0) continue;
+    if (!appendTextToFunctionResponse(content.parts[firstResponseIndex], leadingTexts)) continue;
+    for (const index of leadingIndexes.reverse()) content.parts.splice(index, 1);
+  }
+}
+
 type ToolUseOccurrence = { name: string; signature: string | null };
 
 /**
@@ -422,6 +488,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   // (400 INVALID_ARGUMENT: "Request contains consecutive messages with the same role").
   // Normalize adjacent same-role messages by concatenating their parts.
   result.contents = mergeConsecutiveSameRoleContents(result.contents);
+  mergeTrailingTextIntoFunctionResponses(result.contents);
   // Guard the one alternation violation the merge above cannot reach: history
   // that opens with a functionCall-bearing turn instead of a user turn.
   result.contents = ensureHistoryDoesNotOpenWithFunctionCall(result.contents);

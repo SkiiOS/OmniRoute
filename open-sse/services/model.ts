@@ -149,6 +149,15 @@ interface ProviderConnectionLike {
  * placeholder. A "/"-qualified model name is an explicit provider/model choice
  * and is always returned untouched.
  *
+ * Only a placeholder is replaced: the resolved model must be empty, null or
+ * "auto". A concrete bare model name (e.g. a catalog short name such as
+ * "claude-haiku-4-5") is an explicit choice too; replacing it with the
+ * connection's `defaultModel` silently served a different model (a Gemini
+ * default answering a Claude request) with no error anywhere.
+ *
+ * Set `BARE_MODEL_DEFAULT_OVERRIDE_LEGACY=true` to restore the previous
+ * behaviour (any bare name is replaced); it logs one warning per pair.
+ *
  * Pure function — `requestedModelStr` is the raw client-facing model string
  * (used only to decide whether the name is "bare"); `resolvedModel` is the
  * already-resolved model that would otherwise be sent upstream.
@@ -162,10 +171,33 @@ export function resolveBareModelToConnectionDefault(
   if (typeof requestedModelStr !== "string" || requestedModelStr.includes("/")) {
     return fallback;
   }
-  if (typeof connectionDefaultModel === "string" && connectionDefaultModel.length > 0) {
+  if (typeof connectionDefaultModel !== "string" || connectionDefaultModel.length === 0) {
+    return fallback;
+  }
+  if (fallback === null || fallback === "" || fallback === "auto") {
+    return connectionDefaultModel;
+  }
+  if (fallback === connectionDefaultModel) return fallback;
+  if (isBareModelDefaultOverrideLegacy()) {
+    warnLegacyBareModelOverride(fallback, connectionDefaultModel);
     return connectionDefaultModel;
   }
   return fallback;
+}
+
+function isBareModelDefaultOverrideLegacy() {
+  return isTruthyEnv(process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY);
+}
+
+const legacyBareModelOverrideWarned = new Set<string>();
+
+function warnLegacyBareModelOverride(model: string, connectionDefaultModel: string) {
+  const key = `${model}|${connectionDefaultModel}`;
+  if (legacyBareModelOverrideWarned.has(key)) return;
+  legacyBareModelOverrideWarned.add(key);
+  log.warn(
+    `BARE_MODEL_DEFAULT_OVERRIDE_LEGACY: '${model}' replaced by the connection defaultModel '${connectionDefaultModel}'`
+  );
 }
 
 function isCrossProxyModelCompatEnabled() {
