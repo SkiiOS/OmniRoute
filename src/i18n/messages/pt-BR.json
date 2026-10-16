@@ -6052,7 +6052,7 @@
     "ccCompatiblePrefixHint": "Usado para aliases como prefix/model-id.",
     "ccCompatiblePrefixPlaceholder": "cc",
     "ccCompatibleValidationHint": "A validação usa a bridge estrita compatível com Claude Code para este provedor.",
-    "claudeExtraUsageShort": "Bloquear Extra",
+    "claudeExtraUsageShort": "Uso extra",
     "claudeExtraUsageToggleTitle": "Alternar bloqueio de extra usage do Claude",
     "codex5hToggleTitle": "Alternar política de limite 5h do Codex",
     "codexFastServiceTierDescription": "Quando habilitado, injeta `service_tier=priority` para esta conexão se o cliente não definir o tier.",
