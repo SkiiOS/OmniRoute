@@ -111,7 +111,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "config/release/wreq-js-rust-notices.md",
   "bin/aliasResolver.mjs",
   // #14006: Antigravity MITM bridge (operator tool for the Antigravity IDE/CLI).
-  // Pure node:* imports, shipped via package.json "files": ["bin/"].
+  // Shipped via package.json "files": ["bin/"]; its only local import is the CJS shim
+  // ../src/mitm/_internal/bridgeCert.cjs (shipped via "src/mitm/").
   "bin/antigravity-bridge.mjs",
   "bin/chatgpt-web-codex-mcp.mjs",
   // #7808: ESM loader hook split out of bin/aliasResolver.mjs to silence CodeQL
