@@ -3384,6 +3384,10 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
+    "autoTosLoadError": "Không thể tải chính sách ToS. Hãy thử lại trước khi thay đổi.",
+    "autoTosSaveError": "Không thể lưu chính sách ToS. Thiết lập trước đó vẫn được hiển thị. Hãy thử lại.",
+    "autoTosIncludeLabel": "Đưa các nhà cung cấp có nhãn ToS: avoid vào auto",
+    "autoTosDescription": "Mặc định tắt. Áp dụng cho mọi tổ hợp auto, không chỉ một tài khoản. Kết nối nhà cung cấp không bật tùy chọn này.",
     "title": "Combo",
     "description": "Tạo các combo mô hình với hỗ trợ định tuyến có trọng số và dự phòng",
     "autoCatalogTitle": "Danh mục định tuyến tự động",
@@ -5271,6 +5275,9 @@
     }
   },
   "providers": {
+    "tosAvoidNoticeTitle": "Nhà cung cấp này mặc định bị loại khỏi auto",
+    "tosAvoidNoticeDescription": "Trạng thái ToS được đánh dấu avoid. Kết nối tài khoản không thay đổi chính sách này. Hãy xem điều khoản của nhà cung cấp trước khi bật tùy chọn chung cho mọi tổ hợp auto.",
+    "tosAvoidNoticeAction": "Xem chính sách auto",
     "codexReleaseCooldown": "Xóa thời gian chờ cục bộ",
     "codexReleaseCooldownHint": "Cho phép thử lại tài khoản Codex này. Không đổi lượt đặt lại và không thay đổi giới hạn của upstream.",
     "codexReleasingCooldown": "Đang xóa…",

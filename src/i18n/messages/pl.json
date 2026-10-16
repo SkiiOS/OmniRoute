@@ -3384,6 +3384,10 @@
     "comboRefMember": "Kombinacja → {name}"
   },
   "combos": {
+    "autoTosLoadError": "Nie udało się wczytać zasad ToS. Spróbuj ponownie przed ich zmianą.",
+    "autoTosSaveError": "Nie udało się zapisać zasad ToS. Nadal wyświetlane jest poprzednie ustawienie. Spróbuj ponownie.",
+    "autoTosIncludeLabel": "Uwzględnij dostawców oznaczonych ToS: avoid w auto",
+    "autoTosDescription": "Domyślnie wyłączone. Dotyczy wszystkich kombinacji auto, a nie tylko jednego konta. Połączenie dostawcy nie włącza tej opcji.",
     "title": "Kombinacje",
     "description": "Tworzenie model combos z routingiem ważonym i obsługą fallback",
     "autoCatalogTitle": "Katalog auto-routingu",
@@ -5271,6 +5275,9 @@
     }
   },
   "providers": {
+    "tosAvoidNoticeTitle": "Ten dostawca jest domyślnie wykluczony z auto",
+    "tosAvoidNoticeDescription": "Jego status ToS to avoid. Połączenie konta nie zmienia tej zasady. Przeczytaj warunki dostawcy przed włączeniem globalnej opcji dla wszystkich kombinacji auto.",
+    "tosAvoidNoticeAction": "Sprawdź zasady auto",
     "codexReleaseCooldown": "Wyczyść lokalny cooldown",
     "codexReleaseCooldownHint": "Pozwala ponownie spróbować użyć tego konta Codex. Nie wykorzystuje kredytu resetu i nie zmienia limitów upstream.",
     "codexReleasingCooldown": "Czyszczenie…",

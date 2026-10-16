@@ -3384,6 +3384,10 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
+    "autoTosLoadError": "Het ToS-beleid kon niet worden geladen. Probeer het opnieuw voordat je het wijzigt.",
+    "autoTosSaveError": "Het ToS-beleid kon niet worden opgeslagen. De vorige instelling wordt nog getoond. Probeer het opnieuw.",
+    "autoTosIncludeLabel": "Providers met ToS: avoid opnemen in auto",
+    "autoTosDescription": "Standaard uitgeschakeld. Geldt voor alle auto-combo’s, niet alleen voor één account. Het verbinden van een provider schakelt deze optie niet in.",
     "title": "Combo's",
     "description": "Creëer modelcombinaties met gewogen routing en fallback-ondersteuning",
     "autoCatalogTitle": "Catalogus voor automatische routering",
@@ -5271,6 +5275,9 @@
     }
   },
   "providers": {
+    "tosAvoidNoticeTitle": "Deze provider is standaard uitgesloten van auto",
+    "tosAvoidNoticeDescription": "De ToS-status is avoid. Het verbinden van een account verandert dit beleid niet. Bekijk de voorwaarden van de provider voordat je de globale optie voor alle auto-combo’s inschakelt.",
+    "tosAvoidNoticeAction": "Het auto-beleid bekijken",
     "codexReleaseCooldown": "Lokale cooldown wissen",
     "codexReleaseCooldownHint": "Laat toe dat dit Codex-account opnieuw wordt geprobeerd. Wisselt geen resetcredit in en wijzigt de upstream-limieten niet.",
     "codexReleasingCooldown": "Wissen…",

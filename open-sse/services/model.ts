@@ -6,6 +6,7 @@ import { getRegisteredProviderEffortBaseModelId } from "../utils/registeredEffor
 import { hasProviderModelAlias, resolveProviderModelAlias } from "./modelCanonicalization.ts";
 import { resolveActivePrefixedProviderModel } from "./prefixedProviderModel.ts";
 import { logger } from "../utils/logger.ts";
+import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
 
 export { resolveProviderAlias };
 export { resolveCanonicalProviderModel } from "./modelCanonicalization.ts";
@@ -363,6 +364,23 @@ function shouldTreatAsExactModelId(modelStr: string | null) {
   return !hasKnownProviderModel(providerOrAlias, providerScopedModel);
 }
 
+// parseModel is deterministic for a given string except MODEL_ALIAS_COMPAT_ENABLED,
+// which normalizeCrossProxyModelId reads on every call. The flag is part of the key
+// so an env toggle cannot return a stale parse. Callers receive a copy: the cache
+// must not alias a mutated result into the next request.
+export const PARSE_MODEL_CACHE_LIMIT = 2048;
+export const parseModelCache = boundedMap<ParsedModel>(
+  "parse-model-cache",
+  PARSE_MODEL_CACHE_LIMIT,
+  "lru"
+);
+
+function parseModelCacheKey(modelStr: string): string {
+  const raw = process.env.MODEL_ALIAS_COMPAT_ENABLED;
+  const compat = raw === "false" || raw === "0" ? "0" : "1";
+  return `${compat}\0${modelStr}`;
+}
+
 /**
  * Resolve a provider/model pair into canonical provider ID + provider-scoped model ID.
  * Keeps provider-specific legacy aliases out of downstream capability and budget lookups.
@@ -372,6 +390,16 @@ function shouldTreatAsExactModelId(modelStr: string | null) {
  * Supports [1m] suffix for extended 1M context window (e.g. "claude-sonnet-4-6[1m]")
  */
 export function parseModel(modelStr: string | null | undefined): ParsedModel {
+  if (typeof modelStr !== "string") return parseModelUncached(modelStr);
+  const key = parseModelCacheKey(modelStr);
+  const cached = parseModelCache.get(key);
+  if (cached) return { ...cached };
+  const parsed = parseModelUncached(modelStr);
+  parseModelCache.set(key, parsed);
+  return { ...parsed };
+}
+
+function parseModelUncached(modelStr: string | null | undefined): ParsedModel {
   // Guard truthy non-strings (object/number/array), not just falsy values — a
   // malformed combo `modelStr` or providerSpecificData saved as an object would
   // otherwise reach `cleanStr.endsWith("[1m]")` and crash with

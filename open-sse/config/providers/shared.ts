@@ -226,6 +226,13 @@ export interface RegistryEntry {
    */
   forceStream?: boolean;
   /**
+   * Opt-in for providers that use prompt-emulated tool calling (e.g. web-session
+   * providers like opencode, duckduckgo-web, cloudflare-playground). When set to
+   * "emulated", the combo tool-calling filter will keep these providers eligible
+   * even though their registry/capability rows report toolCalling:false.
+   */
+  toolCalling?: "emulated" | boolean;
+  /**
    * Literal API key sent as the bearer token when the request has no real
    * credential (synthetic noauth fallback). Lets a primarily-authenticated
    * provider expose its free tier anonymously: e.g. Kilo's gateway accepts
